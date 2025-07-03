@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌉 CodeBridge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+    <div class="min-h-screen py-6 flex flex-col justify-center sm:py-12">
+        <div class="relative py-3 sm:max-w-xl sm:mx-auto">
+            <div class="absolute inset-0 gradient-bg shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+            <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+                <div class="max-w-md mx-auto">
+                    <div class="text-center">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                            🌉 CodeBridge
+                        </h1>
+                        <p class="text-lg text-gray-600 mb-8">
+                            Bridging the Gap Between Code and Community
+                        </p>
+                        <div class="mb-6">
+                            <span id="status" class="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
+                                🔍 Checking Backend...
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-200">
+                        <div class="py-4 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                            <div class="flex items-center justify-between">
+                                <span>Backend Status:</span>
+                                <span id="backend-status" class="font-semibold">Checking...</span>
+                            </div>
+                            
+                            <div id="health-info" class="space-y-2 hidden">
+                                <div class="flex items-center justify-between">
+                                    <span>App Version:</span>
+                                    <span id="app-version" class="font-semibold">-</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Environment:</span>
+                                    <span id="environment" class="font-semibold">-</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>System:</span>
+                                    <span id="system" class="font-semibold">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-6 text-base leading-6 font-bold sm:text-lg sm:leading-7">
+                            <div class="space-y-2">
+                                <a href="http://localhost:3047/docs" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="block w-full text-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                    📖 API Documentation
+                                </a>
+                                <a href="http://localhost:3047/api/health" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="block w-full text-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                                    🏥 Health Check
+                                </a>
+                                <a href="http://localhost:3047/" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="block w-full text-center px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors">
+                                    🚀 API Root
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check backend connectivity
+        async function checkBackend() {
+            try {
+                const response = await fetch('http://localhost:3047/api/health');
+                const data = await response.json();
+                
+                // Update status
+                document.getElementById('status').className = 'inline-block px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800';
+                document.getElementById('status').textContent = '✅ Backend Connected';
+                document.getElementById('backend-status').textContent = 'Connected ✅';
+                
+                // Show health info
+                document.getElementById('health-info').classList.remove('hidden');
+                document.getElementById('app-version').textContent = data.version || 'Unknown';
+                document.getElementById('environment').textContent = data.environment || 'Unknown';
+                document.getElementById('system').textContent = data.system?.platform || 'Unknown';
+                
+            } catch (error) {
+                // Update status for disconnected
+                document.getElementById('status').className = 'inline-block px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800';
+                document.getElementById('status').textContent = '❌ Backend Disconnected';
+                document.getElementById('backend-status').textContent = 'Disconnected ❌';
+            }
+        }
+
+        // Check on page load
+        checkBackend();
+        
+        // Check every 10 seconds
+        setInterval(checkBackend, 10000);
+    </script>
+</body>
+</html>

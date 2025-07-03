@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: codebridge-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: codebridge
+      POSTGRES_USER: codebridge
+      POSTGRES_PASSWORD: codebridge123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codebridge -d codebridge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codebridge-backend
+    ports:
+      - "3047:3047"
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=json
+      - HOST=0.0.0.0
+      - PORT=3047
+      - ALLOWED_HOSTS=["*"]
+      - DATABASE_URL=postgresql://codebridge:codebridge123@postgres:5432/codebridge
+      - ASYNC_DATABASE_URL=postgresql+asyncpg://codebridge:codebridge123@postgres:5432/codebridge
+    volumes:
+      - ./app:/app/app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3047/api/health/simple"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Frontend service (to be implemented)
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: codebridge-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: codebridge-network
